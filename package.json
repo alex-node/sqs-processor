@@ -1,0 +1,26 @@
+{
+  "name": "sqs-processor",
+  "version": "1.0.0",
+  "description": "SQS Processor",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jon Buckley <jon@jbuckley.ca>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jbuck/sqs-processor.git"
+  },
+  "keywords": [
+    "sqs"
+  ],
+  "bugs": {
+    "url": "https://github.com/jbuck/sqs-processor/issues"
+  },
+  "homepage": "https://github.com/jbuck/sqs-processor",
+  "dependencies": {
+    "async": "^0.9.0",
+    "aws-sdk": "^2.0.15"
+  }
+}
