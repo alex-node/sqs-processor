@@ -4,7 +4,7 @@
   "description": "SQS Processor",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/simple.js && node test/error.js"
   },
   "author": "Jon Buckley <jon@jbuckley.ca>",
   "license": "Apache-2.0",
@@ -21,6 +21,7 @@
   "homepage": "https://github.com/jbuck/sqs-processor",
   "dependencies": {
     "async": "^0.9.0",
-    "aws-sdk": "^2.0.15"
+    "aws-sdk": "^2.1.14",
+    "debug": "^2.1.1"
   }
 }

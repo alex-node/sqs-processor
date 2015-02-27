@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+- "0.10"
+- "0.12"
+- "iojs"
+env:
+  global:
+  - SQSP_AWS_ACCESS_KEY_ID=AKIAJHQ6HGXNIEDUUEZQ
+  - secure: Oxu2EEZNzt5XklmHIniFLXQ3OrAesThsdMnHanYJtsTsKUr0kvnZgZTJzGDB/CmL7zyQDHp+JFlmlxL/saKxvTgXrFKoV4BwfD68zTtjQAunpIaTjiwf15JMazQqzOv+60EstLsq1LJpyrwLTRNdTw6idQA8a4YcTkPDo7HTUbQ=
+  - SQSP_AWS_REGION=us-east-1
+  - SQSP_AWS_QUEUE_URL=https://sqs.us-east-1.amazonaws.com/930109382762/test-sqs-processor

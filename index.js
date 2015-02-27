@@ -1,38 +1,39 @@
 var async = require("async");
 var AWS = require("aws-sdk");
+var debug = require("debug")("sqs-processor");
 
 var SQSProcessor = function(options) {
   this._queue = new AWS.SQS({
     accessKeyId: options.accessKeyId,
     secretAccessKey: options.secretAccessKey,
-    region: options.region
+    region: options.region,
+    params: {
+      QueueUrl: options.queueUrl
+    }
   });
-  this._debug = options.debug;
-  this._queueUrl = options.queueUrl;
   this._run = false;
 };
 
 SQSProcessor.prototype.startPolling = function(worker_cb, error_cb) {
-  this.worker_cb = worker_cb;
-  this.error_cb = error_cb;
-  this.run = true;
+  this._worker_cb = worker_cb;
+  this._error_cb = error_cb;
+  this._run = true;
   this._poll();
 };
 
 SQSProcessor.prototype._poll = function() {
-  var _this = this;
+  var that = this;
 
   async.whilst(function() {
-    return _this.run;
+    return that._run;
   }, function(poll_cb) {
-    _this._debugMessage("requesting a message");
+    debug("requesting message");
 
-    _this._receive_request = _this._queue.receiveMessage({
+    that._receive_request = that._queue.receiveMessage({
       MaxNumberOfMessages: 1,
-      QueueUrl: _this._queueUrl,
       WaitTimeSeconds: 20
     }, function(receive_error, data) {
-      _this._receive_request = null;
+      that._receive_request = null;
 
       if (receive_error) {
         receive_error.from = "queue.recieveMessage()";
@@ -40,7 +41,7 @@ SQSProcessor.prototype._poll = function() {
       }
 
       if (!data || !Array.isArray(data.Messages) || data.Messages.length !== 1) {
-        _this._debugMessage("no messages found");
+        debug("no messages found");
         return poll_cb();
       }
 
@@ -53,19 +54,18 @@ SQSProcessor.prototype._poll = function() {
         return poll_cb(json_error);
       }
 
-      _this._debugMessage("processing %j", message);
+      debug("processing %j", message);
 
-      _this.worker_cb(message, function(user_error) {
+      that._worker_cb(message, function(user_error) {
         if (user_error) {
           return process.nextTick(function() {
             poll_cb(user_error)
           });
         }
 
-        _this._debugMessage("deleting a message");
+        debug("deleting message %s", receipt_handle);
 
-        _this._queue.deleteMessage({
-          QueueUrl: _this._queueUrl,
+        that._queue.deleteMessage({
           ReceiptHandle: receipt_handle
         }, function(delete_error) {
           if (delete_error) {
@@ -73,33 +73,33 @@ SQSProcessor.prototype._poll = function() {
             return poll_cb(delete_error);
           }
 
-          _this._debugMessage("message deleted");
+          debug("message %s deleted", receipt_handle);
 
           poll_cb();
         });
       });
     });
   }, function(poll_error) {
-    if (poll_error && poll_error.code !== 'RequestAbortedError') {
-      return _this.error_cb(poll_error);
+    if (!that._run) {
+      if (that._stop_cb) {
+        that._stop_cb()
+      }
+      return;
     }
 
-    _this.stop_cb();
+    that._error_cb(poll_error);
+    process.nextTick(function() {
+      that._poll();
+    });
   });
 };
 
 SQSProcessor.prototype.stopPolling = function(stop_cb) {
-  this.run = false;
-  this.stop_cb = stop_cb;
+  this._stop_cb = stop_cb;
+  this._run = false;
 
   if (this._receive_request) {
     this._receive_request.abort();
-  }
-};
-
-SQSProcessor.prototype._debugMessage = function() {
-  if (this._debug) {
-    console.log.apply(null, arguments);
   }
 };
 
