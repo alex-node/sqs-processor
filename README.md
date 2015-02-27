@@ -1,4 +1,4 @@
-# sqs-processor
+# sqs-processor [![Build Status](https://travis-ci.org/jbuck/sqs-processor.svg?branch=master)](https://travis-ci.org/jbuck/sqs-processor)
 
 SQS processor for nodejs
 
